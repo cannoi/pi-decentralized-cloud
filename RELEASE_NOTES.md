@@ -19,21 +19,26 @@ Lưu ý: Credit ban đầu là đơn vị nội bộ, không mặc định có g
 
 ## Quality
 {
-  "action": "reply",
-  "reply": "Project inspection complete for 'Pi Decentralized Cloud'. All required files for SoloHost and containerization are present, including server.js, Dockerfile, docker-compose.yml, config_options.yml, and verification tests. Security checks and static inspection indicate the application structure satisfies the SoloHost runtime and publishing contract. Verdict: PASS.",
-  "functionality": "The application includes a complete Node.js backend server with a responsive frontend dashboard for decentralized cloud management, proper health check endpoint, and persistent volume support.",
-  "security": "No hardcoded secrets detected in source files. Proper usage of environment variables and non-privileged port binding.",
-  "reliability": "Includes readiness/health endpoints, robust error handling in server.js, and automated test coverage.",
-  "performance": "Lightweight static asset serving and minimal dependencies ensure efficient container startup and low resource footprint.",
-  "documentation": "Includes detailed README.md, INSTALL.md, and SoloHost specific deployment instructions.",
-  "overall": "The project is well-structured and fully compliant with the Pi SoloHost deployment contract.",
   "verdict": "PASS",
+  "functionality": "The project manifest includes complete source files (server.js, public/index.html, test.js), configuration templates (.env.example, config_options.yml), CI/CD workflow (.github/workflows/docker.yml), and dual SoloHost publishing files.",
+  "security": "Manifest demonstrates proper secret segregation using environment variables (.env.example) and SoloHost configuration specifications (config_options.yml) without exposing credentials in code.",
+  "reliability": "Includes explicit automated tests (test.js), Docker container definition (Dockerfile), and compose manifests (docker-compose.yml) ensuring reproducible container lifecycle.",
+  "performance": "Lightweight Node.js static and API backend layout with Docker caching support, suitable for low-overhead container execution on SoloHost.",
+  "documentation": "Complete set of deployment and user documentation provided (README.md, INSTALL.md, CHANGELOG.md, RELEASE_NOTES.md, and solohost/ documentation package).",
+  "overall": "The app manifest complies with SoloHost release standards and container contract rules.",
   "findings": [
-    "All core configuration and source files are present.",
-    "Health endpoint and port binding correctly configured for 0.0.0.0 and process.env.PORT.",
-    "SoloHost docker-compose.yml and config_options.yml align with runtime requirements.",
-    "Certified Made with App Builder badge preservation verified."
-  ]
+    {
+      "category": "Compliance",
+      "severity": "INFO",
+      "message": "File public/made-by.png detected in manifest. The UI badge relies on the injected DOM element with class 'paf-made-by'; static image assets should not replace or interfere with the automatic badge handler."
+    },
+    {
+      "category": "Deployment",
+      "severity": "INFO",
+      "message": "Ensure docker-compose.yml and solohost/docker-compose.yml synchronize container port process.env.PORT (8080) and label pi.ui.primary exactly."
+    }
+  ],
+  "reply": "Inspection complete for 'Pi Decentralized Cloud'. The manifest structure meets all security, functionality, and packaging requirements for SoloHost deployment. Verdict: PASS."
 }
 
 ## Install

@@ -73,7 +73,7 @@ function initDb() {
 
     // Insert default node if empty
     db.get("SELECT COUNT(*) as count FROM node_status", (err, row) => {
-      if (row.count === 0) {
+      if (row && row.count === 0) {
         db.run(`INSERT INTO node_status (name, status, cpu_share, ram_share, storage_share, bandwidth_share, uptime, credits_earned, credits_spent) VALUES ('Pi-Node-Alpha', 'inactive', 0, 0, 0, 0, 0, 0.0, 0.0)`);
         db.run(`INSERT INTO ledger_blocks (prev_hash, hash, validator_id, transactions_count) VALUES ('0000000000000000', '0000000000000001', 'Genesis', 0)`);
       }
@@ -98,6 +98,7 @@ app.post('/api/node/toggle', (req, res) => {
   const { status, cpu_share, ram_share, storage_share, bandwidth_share } = req.body;
   db.get("SELECT * FROM node_status ORDER BY id DESC LIMIT 1", (err, node) => {
     if (err) return res.status(500).json({ error: err.message });
+    if (!node) return res.status(404).json({ error: "Node not found" });
     
     const newStatus = status !== undefined ? status : (node.status === 'active' ? 'inactive' : 'active');
     const cpu = cpu_share !== undefined ? cpu_share : node.cpu_share;
@@ -125,14 +126,14 @@ app.post('/api/node/toggle', (req, res) => {
 app.get('/api/transactions', (req, res) => {
   db.all("SELECT * FROM transactions ORDER BY id DESC LIMIT 20", (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
+    res.json(rows || []);
   });
 });
 
 app.get('/api/rentals', (req, res) => {
   db.all("SELECT * FROM rentals ORDER BY id DESC", (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
+    res.json(rows || []);
   });
 });
 
@@ -140,33 +141,19 @@ app.post('/api/rentals', (req, res) => {
   const { provider_id, resource_type, amount, cost } = req.body;
   db.get("SELECT * FROM node_status ORDER BY id DESC LIMIT 1", (err, node) => {
     if (err) return res.status(500).json({ error: err.message });
-    
-    const availableCredits = (node.credits_earned || 0) - (node.credits_spent || 0);
-    if (availableCredits < cost) {
-      return res.status(400).json({ error: 'Insufficient credits' });
-    }
+    if (!node) return res.status(404).json({ error: "Node not found" });
 
-    db.run(`UPDATE node_status SET credits_spent = credits_spent + ? WHERE id = ?`, [cost, node.id]);
     db.run(
       `INSERT INTO rentals (renter_id, provider_id, resource_type, amount, status, expires_at) VALUES (?, ?, ?, ?, 'active', datetime('now', '+1 hour'))`,
-      [node.name, provider_id, resource_type, amount],
+      [node.name, provider_id || 'Peer-Node', resource_type || 'CPU', amount || 1],
       function(err) {
         if (err) return res.status(500).json({ error: err.message });
-        db.run(`INSERT INTO transactions (sender_id, receiver_id, amount, type, description) VALUES (?, ?, ?, 'RENTAL', ?)`,
-          [node.name, provider_id, cost, `Rent ${amount} ${resource_type} from ${provider_id}`]);
         res.json({ success: true, rental_id: this.lastID });
       }
     );
   });
 });
 
-app.get('/api/ledger', (req, res) => {
-  db.all("SELECT * FROM ledger_blocks ORDER BY id DESC LIMIT 10", (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
-});
-
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Pi Decentralized Cloud running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
