@@ -1,12 +1,7 @@
 title: "Pi Decentralized Cloud"
 eyebrow: SoloHost App
-description: "Xây dựng app DECENTRALIZED CLOUD – Pi SoloHost (Docker): nền tảng đám mây phi tập trung cho phép người dùng chia sẻ tài nguyên máy tính và nhận điểm tài nguyên tương ứng.  - Chia sẻ ổ đĩa, RAM, CPU, băng thông và thời gi"
+description: "Xây dựng app DECENTRALIZED CLOUD – Pi SoloHost (Docker): nền tảng đám mây phi tập trung cho phép người dùng chia sẻ tài nguyên máy tính và nhận điểm tài nguyên tương ứng."
 footer_hint: Ready to run on Pi Desktop SoloHost.
 output_file: .env
 after_save: Saved. Start the app from SoloHost.
-fields:
-  - name: GITHUB_REPOSITORY_OWNER
-    label: Github Repository Owner
-    type: text
-    preserve_if_blank: true
-    help: "Optional setting. Leave blank to use the app default."
+fields: []
