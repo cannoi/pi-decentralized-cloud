@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pi Decentralized Cloud</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>.paf-made-by{position:fixed;right:8px;bottom:8px;width:min(72px,12vw);max-width:12vw;height:auto;object-fit:contain;opacity:.5;background:transparent;padding:0;border:0;box-shadow:none;filter:none;pointer-events:none;z-index:30}</style></head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col">
+  <!-- Navbar -->
+  <nav class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+      <div class="bg-amber-500 p-2 rounded-xl text-slate-900 font-bold text-xl">
+        <i class="fa-solid fa-cloud"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-wide" data-i18n="title">Pi Decentralized Cloud</h1>
+        <p class="text-xs text-slate-400" data-i18n="subtitle">Pi SoloHost Resource Sharing Network</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-4">
+      <div id="node-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-700 text-slate-300">
+        <i class="fa-solid fa-circle text-slate-500 mr-1"></i> <span data-i18n="status_offline">Offline</span>
+      </div>
+      <select id="lang-switch" class="bg-slate-700 text-slate-200 text-sm rounded-lg px-3 py-1.5 border border-slate-600 focus:outline-none">
+        <option value="en">English</option>
+        <option value="vi">Tiếng Việt</option>
+      </select>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left & Center: Dashboard & Resource Sharing -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Node Status & Controls -->
+      <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h2 class="text-lg font-bold" data-i18n="resource_sharing">Resource Sharing Node</h2>
+            <p class="text-sm text-slate-400" data-i18n="resource_desc">Share idle hardware to earn resource credits.</p>
+          </div>
+          <button id="toggle-node-btn" class="px-5 py-2.5 rounded-xl font-semibold transition bg-amber-500 hover:bg-amber-400 text-slate-900">
+            <i class="fa-solid fa-power-off mr-2"></i> <span data-i18n="start_sharing">Start Sharing</span>
+          </button>
+        </div>
+
+        <!-- Sliders -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span data-i18n="cpu_allocation">CPU Allocation</span>
+              <span id="cpu-val">0%</span>
+            </div>
+            <input type="range" id="cpu-range" min="0" max="100" value="0" class="w-full accent-amber-500 bg-slate-700 rounded-lg">
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span data-i18n="ram_allocation">RAM Allocation</span>
+              <span id="ram-val">0 GB</span>
+            </div>
+            <input type="range" id="ram-range" min="0" max="32" value="0" class="w-full accent-amber-500 bg-slate-700 rounded-lg">
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span data-i18n="storage_allocation">Storage Allocation</span>
+              <span id="storage-val">0 GB</span>
+            </div>
+            <input type="range" id="storage-range" min="0" max="500" step="10" value="0" class="w-full accent-amber-500 bg-slate-700 rounded-lg">
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span data-i18n="bandwidth_allocation">Bandwidth Allocation</span>
+              <span id="bandwidth-val">0 Mbps</span>
+            </div>
+            <input type="range" id="bandwidth-range" min="0" max="100" value="0" class="w-full accent-amber-500 bg-slate-700 rounded-lg">
+          </div>
+        </div>
+      </div>
+
+      <!-- Marketplace / Peer Nodes -->
+      <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+        <h2 class="text-lg font-bold mb-2" data-i18n="marketplace">Peer Resource Marketplace</h2>
+        <p class="text-sm text-slate-400 mb-4" data-i18n="marketplace_desc">Rent compute power and storage from peer nodes using your earned credits.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="peer-list">
+          <!-- Dynamic Peer Cards -->
+          <div class="bg-slate-700/50 border border-slate-600 p-4 rounded-xl flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold text-amber-400">Pi-Cloud-Beta</h3>
+                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">Online</span>
+              </div>
+              <p class="text-xs text-slate-300 mb-3">50GB NVMe Storage, 4 vCPU, 8GB RAM</p>
+            </div>
+            <button onclick="rentResource('Pi-Cloud-Beta', 'Storage', 50, 5)" class="w-full py-2 bg-slate-600 hover:bg-amber-500 hover:text-slate-900 transition rounded-lg text-sm font-semibold">
+              <span data-i18n="rent_for">Rent for</span> 5.0 Credits
+            </button>
+          </div>
+
+          <div class="bg-slate-700/50 border border-slate-600 p-4 rounded-xl flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold text-amber-400">Pi-Compute-Gamma</h3>
+                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">Online</span>
+              </div>
+              <p class="text-xs text-slate-300 mb-3">8 vCPU High Frequency Compute Node</p>
+            </div>
+            <button onclick="rentResource('Pi-Compute-Gamma', 'CPU', 8, 8)" class="w-full py-2 bg-slate-600 hover:bg-amber-500 hover:text-slate-900 transition rounded-lg text-sm font-semibold">
+              <span data-i18n="rent_for">Rent for</span> 8.0 Credits
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transaction History -->
+      <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+        <h2 class="text-lg font-bold mb-4" data-i18n="transactions">Transaction Ledger</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="border-b border-slate-700 text-slate-400">
+                <th class="pb-2" data-i18n="th_type">Type</th>
+                <th class="pb-2" data-i18n="th_desc">Description</th>
+                <th class="pb-2" data-i18n="th_amount">Amount</th>
+                <th class="pb-2" data-i18n="th_time">Time</th>
+              </tr>
+            </thead>
+            <tbody id="tx-table-body">
+              <!-- Dynamic rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Credits & Ledger Blocks -->
+    <div class="space-y-6">
+      <!-- Credit Wallet Card -->
+      <div class="bg-gradient-to-br from-amber-500 to-amber-600 text-slate-900 rounded-2xl p-6 shadow-xl">
+        <div class="flex justify-between items-center mb-4">
+          <span class="font-semibold uppercase tracking-wider text-xs" data-i18n="credit_balance">Credit Balance</span>
+          <i class="fa-solid fa-wallet text-xl"></i>
+        </div>
+        <div class="text-4xl font-extrabold mb-4" id="credit-balance">0.00</div>
+        <div class="grid grid-cols-2 gap-4 text-xs font-semibold bg-amber-400/50 p-3 rounded-xl">
+          <div>
+            <span data-i18n="earned">Earned</span>: <span id="earned-total">0.00</span>
+          </div>
+          <div>
+            <span data-i18n="spent">Spent</span>: <span id="spent-total">0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Rentals -->
+      <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+        <h2 class="text-lg font-bold mb-4" data-i18n="active_rentals">Active Resource Rentals</h2>
+        <div id="rentals-list" class="space-y-3">
+          <p class="text-sm text-slate-400" data-i18n="no_rentals">No active rentals.</p>
+        </div>
+      </div>
+
+      <!-- P2P Ledger Blocks -->
+      <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+        <h2 class="text-lg font-bold mb-4" data-i18n="ledger_blocks">Verified Ledger Blocks</h2>
+        <div id="ledger-list" class="space-y-3 text-xs">
+          <!-- Dynamic ledger blocks -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800 border-t border-slate-700 py-4 text-center text-xs text-slate-400">
+    Pi Decentralized Cloud &bull; Made with App Builder — Pi SoloHost
+  </footer>
+
+  <!-- App Logic -->
+  <script>
+    const i18n = {
+      en: {
+        title: "Pi Decentralized Cloud",
+        subtitle: "Pi SoloHost Resource Sharing Network",
+        status_offline: "Offline",
+        status_online: "Online",
+        resource_sharing: "Resource Sharing Node",
+        resource_desc: "Share idle hardware to earn resource credits.",
+        start_sharing: "Start Sharing",
+        stop_sharing: "Stop Sharing",
+        cpu_allocation: "CPU Allocation",
+        ram_allocation: "RAM Allocation",
+        storage_allocation: "Storage Allocation",
+        bandwidth_allocation: "Bandwidth Allocation",
+        marketplace: "Peer Resource Marketplace",
+        marketplace_desc: "Rent compute power and storage from peer nodes using your earned credits.",
+        rent_for: "Rent for",
+        transactions: "Transaction Ledger",
+        th_type: "Type",
+        th_desc: "Description",
+        th_amount: "Amount",
+        th_time: "Time",
+        credit_balance: "Credit Balance",
+        earned: "Earned",
+        spent: "Spent",
+        active_rentals: "Active Resource Rentals",
+        no_rentals: "No active rentals.",
+        ledger_blocks: "Verified Ledger Blocks"
+      },
+      vi: {
+        title: "Đám mây phi tập trung Pi",
+        subtitle: "Mạng chia sẻ tài nguyên Pi SoloHost",
+        status_offline: "Ngoại tuyến",
+        status_online: "Trực tuyến",
+        resource_sharing: "Nút chia sẻ tài nguyên",
+        resource_desc: "Chia sẻ phần cứng nhàn rỗi để kiếm tín dụng tài nguyên.",
+        start_sharing: "Bắt đầu chia sẻ",
+        stop_sharing: "Dừng chia sẻ",
+        cpu_allocation: "Phân bổ CPU",
+        ram_allocation: "Phân bổ RAM",
+        storage_allocation: "Phân bổ Lưu trữ",
+        bandwidth_allocation: "Phân bổ Băng thông",
+        marketplace: "Chợ tài nguyên ngang hàng",
+        marketplace_desc: "Thuê sức mạnh tính toán và lưu trữ từ các nút ngang hàng bằng tín dụng đã kiếm được.",
+        rent_for: "Thuê với",
+        transactions: "Sổ cái giao dịch",
+        th_type: "Loại",
+        th_desc: "Mô tả",
+        th_amount: "Số lượng",
+        th_time: "Thời gian",
+        credit_balance: "Số dư tín dụng",
+        earned: "Đã kiếm",
+        spent: "Đã tiêu",
+        active_rentals: "Tài nguyên đang thuê",
+        no_rentals: "Không có tài nguyên nào đang thuê.",
+        ledger_blocks: "Khối sổ cái đã xác minh"
+      }
+    };
+
+    let currentLang = 'en';
+
+    document.getElementById('lang-switch').addEventListener('change', (e) => {
+      currentLang = e.target.value;
+      updateTranslations();
+    });
+
+    function updateTranslations() {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (i18n[currentLang][key]) {
+          el.innerText = i18n[currentLang][key];
+        }
+      });
+    }
+
+    async function fetchNodeStatus() {
+      try {
+        const res = await fetch('/api/node');
+        const node = await res.json();
+        
+        document.getElementById('cpu-range').value = node.cpu_share || 0;
+        document.getElementById('cpu-val').innerText = (node.cpu_share || 0) + '%';
+        document.getElementById('ram-range').value = node.ram_share || 0;
+        document.getElementById('ram-val').innerText = (node.ram_share || 0) + ' GB';
+        document.getElementById('storage-range').value = node.storage_share || 0;
+        document.getElementById('storage-val').innerText = (node.storage_share || 0) + ' GB';
+        document.getElementById('bandwidth-range').value = node.bandwidth_share || 0;
+        document.getElementById('bandwidth-val').innerText = (node.bandwidth_share || 0) + ' Mbps';
+
+        const earned = node.credits_earned || 0;
+        const spent = node.credits_spent || 0;
+        document.getElementById('credit-balance').innerText = (earned - spent).toFixed(2);
+        document.getElementById('earned-total').innerText = earned.toFixed(2);
+        document.getElementById('spent-total').innerText = spent.toFixed(2);
+
+        const badge = document.getElementById('node-badge');
+        const btn = document.getElementById('toggle-node-btn');
+        if (node.status === 'active') {
+          badge.className = "px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400";
+          badge.innerHTML = `<i class="fa-solid fa-circle text-emerald-400 mr-1"></i> ${i18n[currentLang].status_online}`;
+          btn.className = "px-5 py-2.5 rounded-xl font-semibold transition bg-rose-500 hover:bg-rose-400 text-slate-900";
+          btn.innerHTML = `<i class="fa-solid fa-power-off mr-2"></i> ${i18n[currentLang].stop_sharing}`;
+        } else {
+          badge.className = "px-3 py-1 rounded-full text-xs font-semibold bg-slate-700 text-slate-300";
+          badge.innerHTML = `<i class="fa-solid fa-circle text-slate-500 mr-1"></i> ${i18n[currentLang].status_offline}`;
+          btn.className = "px-5 py-2.5 rounded-xl font-semibold transition bg-amber-500 hover:bg-amber-400 text-slate-900";
+          btn.innerHTML = `<i class="fa-solid fa-power-off mr-2"></i> ${i18n[currentLang].start_sharing}`;
+        }
+      } catch (err) {
+        console.error('Failed to fetch node status', err);
+      }
+    }
+
+    async function fetchTransactions() {
+      try {
+        const res = await fetch('/api/transactions');
+        const txs = await res.json();
+        const tbody = document.getElementById('tx-table-body');
+        tbody.innerHTML = txs.map(tx => `
+          <tr class="border-b border-slate-700/50">
+            <td class="py-3 font-semibold text-amber-400">${tx.type}</td>
+            <td class="py-3 text-slate-300">${tx.description}</td>
+            <td class="py-3 font-mono ${tx.type === 'REWARD' ? 'text-emerald-400' : 'text-rose-400'}">${tx.type === 'REWARD' ? '+' : '-'}${tx.amount.toFixed(2)}</td>
+            <td class="py-3 text-slate-400 text-xs">${new Date(tx.timestamp).toLocaleTimeString()}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to fetch transactions', err);
+      }
+    }
+
+    async function fetchRentals() {
+      try {
+        const res = await fetch('/api/rentals');
+        const rentals = await res.json();
+        const list = document.getElementById('rentals-list');
+        if (rentals.length === 0) {
+          list.innerHTML = `<p class="text-sm text-slate-400">${i18n[currentLang].no_rentals}</p>`;
+          return;
+        }
+        list.innerHTML = rentals.map(r => `
+          <div class="bg-slate-700/40 p-3 rounded-xl border border-slate-600">
+            <div class="flex justify-between items-center text-sm">
+              <span class="font-bold text-amber-400">${r.provider_id}</span>
+              <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">${r.status}</span>
+            </div>
+            <p class="text-xs text-slate-300 mt-1">${r.amount} ${r.resource_type} rented</p>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to fetch rentals', err);
+      }
+    }
+
+    async function fetchLedger() {
+      try {
+        const res = await fetch('/api/ledger');
+        const blocks = await res.json();
+        const list = document.getElementById('ledger-list');
+        list.innerHTML = blocks.map(b => `
+          <div class="bg-slate-700/30 p-2.5 rounded-lg border border-slate-700 font-mono">
+            <div class="flex justify-between text-slate-400">
+              <span>Block #${b.id}</span>
+              <span>${b.validator_id}</span>
+            </div>
+            <div class="text-amber-400 truncate mt-1">Hash: ${b.hash}</div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to fetch ledger', err);
+      }
+    }
+
+    document.getElementById('toggle-node-btn').addEventListener('click', async () => {
+      const cpu = parseInt(document.getElementById('cpu-range').value);
+      const ram = parseInt(document.getElementById('ram-range').value);
+      const storage = parseInt(document.getElementById('storage-range').value);
+      const bandwidth = parseInt(document.getElementById('bandwidth-range').value);
+
+      await fetch('/api/node/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cpu_share: cpu, ram_share: ram, storage_share: storage, bandwidth_share: bandwidth })
+      });
+      refreshAll();
+    });
+
+    ['cpu', 'ram', 'storage', 'bandwidth'].forEach(id => {
+      const range = document.getElementById(`${id}-range`);
+      range.addEventListener('input', (e) => {
+        const val = e.target.value;
+        const unit = id === 'cpu' ? '%' : (id === 'ram' ? ' GB' : (id === 'storage' ? ' GB' : ' Mbps'));
+        document.getElementById(`${id}-val`).innerText = val + unit;
+      });
+      range.addEventListener('change', async () => {
+        const cpu = parseInt(document.getElementById('cpu-range').value);
+        const ram = parseInt(document.getElementById('ram-range').value);
+        const storage = parseInt(document.getElementById('storage-range').value);
+        const bandwidth = parseInt(document.getElementById('bandwidth-range').value);
+
+        await fetch('/api/node/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cpu_share: cpu, ram_share: ram, storage_share: storage, bandwidth_share: bandwidth })
+        });
+        refreshAll();
+      });
+    });
+
+    async function rentResource(provider, type, amount, cost) {
+      const res = await fetch('/api/rentals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider_id: provider, resource_type: type, amount, cost })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Failed to rent resource');
+      } else {
+        refreshAll();
+      }
+    }
+
+    function refreshAll() {
+      fetchNodeStatus();
+      fetchTransactions();
+      fetchRentals();
+      fetchLedger();
+    }
+
+    setInterval(refreshAll, 5000);
+    refreshAll();
+  </script>
+<img class="paf-made-by" src="/made-by.png" alt="Made with App Builder — Pi SoloHost"></body>
+</html>
